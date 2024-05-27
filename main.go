@@ -4,12 +4,15 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"text/template"
 
 	"github.com/joho/godotenv"
 )
 
+var tpl = template.Must(template.ParseFiles("index.html"))
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("<h1>Hello World!</h1>"))
+	tpl.Execute(w, nil)
 }
 func main() {
 	err := godotenv.Load()
@@ -22,7 +25,10 @@ func main() {
 		port = "3000"
 	}
 
+	fs := http.FileServer(http.Dir("assets"))
+
 	mux := http.NewServeMux()
+	mux.Handle("/assets/", http.StripPrefix("/assets/", fs))
 	mux.HandleFunc("/", indexHandler)
 	http.ListenAndServe(":"+port, mux)
 }
