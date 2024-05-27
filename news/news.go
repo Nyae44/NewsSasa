@@ -1,11 +1,58 @@
 package news
 
-import "net/http"
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"time"
+)
+
+type Article struct {
+	Source struct {
+		ID   interface{} `json:"id"`
+		Name string      `json:"name"`
+	} `json:"source"`
+
+	Author      string    `json:"author"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	URL         string    `json:"url"`
+	URLToImage  string    `json:"urltoimage"`
+	PublishedAt time.Time `json:"publishedat"`
+	Content     string    `json:"content"`
+}
+
+type Results struct {
+	Status       string    `json:"status"`
+	TotalResults int       `json:"totalresults"`
+	Articles     []Article `json:"articles"`
+}
 
 type Client struct {
 	http     *http.Client
 	key      string
 	pageSize int
+}
+
+func (c *Client) FetchEverything(query, page string) (*Results, error) {
+	endpoint := fmt.Sprintf("https://newsapi.org/v2/everything?q=%s&pageSize=%d&page=%s&apiKey=%s&sortBy=publishedAt&language=en", url.QueryEscape(query), c.pageSize, page, c.key)
+	resp, err := c.http.Get(endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(string(body))
+	}
+	res := &Results{}
+	return res, json.Unmarshal(body, res)
 }
 
 func NewClient(httpClient *http.Client, key string, pageSize int) *Client {
