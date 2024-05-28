@@ -24,6 +24,11 @@ type Article struct {
 	Content     string    `json:"content"`
 }
 
+func (a *Article) FormatPublishedDate() string {
+	year, month, day := a.PublishedAt.Date()
+	return fmt.Sprintf("%v %d, %d", month, day, year)
+}
+
 type Results struct {
 	Status       string    `json:"status"`
 	TotalResults int       `json:"totalresults"`
@@ -33,11 +38,11 @@ type Results struct {
 type Client struct {
 	http     *http.Client
 	key      string
-	pageSize int
+	PageSize int
 }
 
 func (c *Client) FetchEverything(query, page string) (*Results, error) {
-	endpoint := fmt.Sprintf("https://newsapi.org/v2/everything?q=%s&pageSize=%d&page=%s&apiKey=%s&sortBy=publishedAt&language=en", url.QueryEscape(query), c.pageSize, page, c.key)
+	endpoint := fmt.Sprintf("https://newsapi.org/v2/everything?q=%s&pageSize=%d&page=%s&apiKey=%s&sortBy=publishedAt&language=en", url.QueryEscape(query), c.PageSize, page, c.key)
 	resp, err := c.http.Get(endpoint)
 	if err != nil {
 		return nil, err
