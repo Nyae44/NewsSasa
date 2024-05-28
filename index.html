@@ -15,7 +15,7 @@
             <input 
             autofocus
             class="search-input"
-            value=""
+            value="{{.Query}}"
             placeholder="Enter a news topic"
             type="search" 
             name="q" 
@@ -23,6 +23,26 @@
         </form>
         <a href="https://github.com/Nyae44/NewsSasa" class="button github button">View on Github</a>
     </header>
+    <section class="container">
+      <ul class="search-results">
+        {{range.Results.Articles}}
+        <li class="news-article">
+          <div>
+            <a target="_blank" rel="noreferrer noopener" href="{{.URL}}">
+              <h3 class="title">{{.Title}}</h3>
+            </a>
+            <p class="description">{{.Description}}</p>
+            <div class="metadata">
+              <p class="source">{{.Source.Name}}</p>
+              <time class="published-date">{{.PublishedAt}}</time>
+            </div>
+          </div>
+          <img class="article-image" src="{{.URLToImage}}"/>
+        </li>
+        {{end}}
+      </ul>
+
+    </section>
   </main>
 </body>
 </html>
